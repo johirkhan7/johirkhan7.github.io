@@ -149,6 +149,14 @@
       background: rgba(255, 255, 255, 0.03); font-weight: 600; color: var(--muted);
     }
     .tag { padding: 6px 8px; border-radius: 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border); color: var(--muted); font-size: 12px; }
+    .toast {
+      position: fixed; right: 18px; bottom: 18px; z-index: 10;
+      padding: 12px 14px; border-radius: 12px;
+      background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border);
+      color: var(--text); box-shadow: 0 10px 32px rgba(0,0,0,0.35);
+      opacity: 0; transform: translateY(8px); transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
     @media (max-width: 640px) {
       .stat { flex-direction: column; align-items: flex-start; gap: 6px; }
       th, td { font-size: 13px; }
@@ -173,7 +181,7 @@
     <section class="grid grid-4">
       <div class="card stat">
         <div>
-          <div class="pill">আজকের অ্যাপয়েন্টমেন্ট</div>
+          <div class="pill">Today's appointments</div>
           <strong id="stat-appointments" style="font-size:24px; display:block; margin-top:6px;">0</strong>
           <small class="sub">Same-day bookings ready</small>
         </div>
@@ -208,12 +216,7 @@
     <section class="card" style="margin-top:16px;">
       <h3>Workflow at a glance</h3>
       <p class="sub">Guide your front desk through the same flow every time.</p>
-      <div class="workflow">
-        <span>1. Intake &amp; record client preference</span>
-        <span>2. Match stylist &amp; service</span>
-        <span>3. Reserve slot, auto check-in</span>
-        <span>4. Close sale &amp; note follow-up</span>
-      </div>
+      <div class="workflow" id="workflow-steps"></div>
     </section>
 
     <section class="grid grid-2" style="margin-top:16px;">
@@ -328,6 +331,7 @@
       </div>
     </section>
   </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <script>
     const storageKey = "bpsms-data";
@@ -342,6 +346,21 @@
     const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => ({
       "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
     })[c]);
+    const toast = document.getElementById("toast");
+    let toastTimer;
+    const notify = (message) => {
+      if (!toast) { alert(message); return; }
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 2800);
+    };
+    const workflowSteps = [
+      "Intake & record client preference",
+      "Match stylist & service",
+      "Reserve slot, auto check-in",
+      "Close sale & note follow-up"
+    ];
     const defaultData = {
       appointments: [
         { customer: "Anika Rahman", service: "Hair Spa", staff: "Rumi", datetime: timeAt(11, 30), status: "Scheduled", notes: "Prefers calm fragrance" },
@@ -373,7 +392,7 @@
     const loadData = () => {
       const saved = localStorage.getItem(storageKey);
       if (saved) {
-        try { return JSON.parse(saved); } catch (e) { console.warn("Resetting corrupted salon data", e); }
+        try { return JSON.parse(saved); } catch (e) { console.warn("Resetting corrupted salon data", e); notify("Saved salon data was reset due to corruption."); }
       }
       return defaultData;
     };
@@ -423,6 +442,11 @@
         })
         .join("");
     };
+    const renderWorkflow = () => {
+      const wrap = document.getElementById("workflow-steps");
+      if (!wrap) return;
+      wrap.innerHTML = workflowSteps.map((step, idx) => `<span>${idx + 1}. ${esc(step)}</span>`).join("");
+    };
 
     const updateStats = () => {
       const today = todayISODate();
@@ -463,7 +487,7 @@
       const price = Number(form.price.value);
       const duration = Number(form.duration.value);
       if (!Number.isFinite(price) || price <= 0 || !Number.isFinite(duration) || duration <= 0) {
-        alert("Enter a valid price (>0) and duration (>0 minutes).");
+        notify("Enter a valid price (>0) and duration (>0 minutes).");
         return;
       }
       state.services.unshift({
@@ -482,7 +506,7 @@
       const qty = Number(form.qty.value);
       const threshold = Number(form.threshold.value);
       if (!Number.isFinite(qty) || qty < 0 || !Number.isFinite(threshold) || threshold < 0) {
-        alert("Enter valid non-negative numbers for quantity and minimum level.");
+        notify("Enter valid non-negative numbers for quantity and minimum level.");
         return;
       }
       state.inventory.unshift({
@@ -514,6 +538,7 @@
     renderNotes();
     renderSelects();
     renderAppointments();
+    renderWorkflow();
     updateStats();
   </script>
 </body>
