@@ -384,8 +384,8 @@
         { item: "Nail polish remover", qty: 3, threshold: 6 }
       ],
       notes: [
-        { client: "VIP / Regular", text: "সাপ্তাহিক ছুটিতে বিশ্বস্ত ক্লায়েন্টদের জন্য স্লট রিজার্ভ রাখুন।" },
-        { client: "স্বাস্থ্যবিধি", text: "ব্রাইডাল সেশনের মাঝে যন্ত্রপাতি জীবাণুমুক্ত করুন।" }
+        { client: "VIP / Regular", text: "সাপ্তাহিক ছুটিতে বিশ্বস্ত ক্লায়েন্টদের জন্য স্লট রিজার্ভ রাখুন (Keep backup slots on weekends for loyal clients)." },
+        { client: "স্বাস্থ্যবিধি", text: "ব্রাইডাল সেশনের মাঝে যন্ত্রপাতি জীবাণুমুক্ত করুন (Sanitize tools between bridal sessions)." }
       ]
     };
 
@@ -505,8 +505,8 @@
       const form = e.target;
       const qty = Number(form.qty.value);
       const threshold = Number(form.threshold.value);
-      if (!Number.isFinite(qty) || qty < 0 || !Number.isFinite(threshold) || threshold < 0) {
-        notify("Enter valid non-negative numbers for quantity and minimum level.");
+      if (!Number.isFinite(qty) || qty <= 0 || !Number.isFinite(threshold) || threshold <= 0) {
+        notify("Enter valid positive numbers for quantity and minimum level.");
         return;
       }
       state.inventory.unshift({
