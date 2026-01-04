@@ -339,6 +339,9 @@
       d.setHours(h, m, 0, 0);
       return d.toISOString().slice(0, 16);
     };
+    const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    })[c]);
     const defaultData = {
       appointments: [
         { customer: "Anika Rahman", service: "Hair Spa", staff: "Rumi", datetime: timeAt(11, 30), status: "Scheduled", notes: "Prefers calm fragrance" },
@@ -382,30 +385,30 @@
     const appointmentBody = document.getElementById("appointments-body");
 
     const renderSelects = () => {
-      serviceSelect.innerHTML = state.services.map(s => `<option value="${s.name}">${s.name} — ${currencySymbol}${s.price}</option>`).join("");
-      staffSelect.innerHTML = state.staff.map(s => `<option value="${s.name}">${s.name} (${s.skill})</option>`).join("");
+      serviceSelect.innerHTML = state.services.map(s => `<option value="${esc(s.name)}">${esc(s.name)} — ${currencySymbol}${esc(s.price)}</option>`).join("");
+      staffSelect.innerHTML = state.staff.map(s => `<option value="${esc(s.name)}">${esc(s.name)} (${esc(s.skill)})</option>`).join("");
       const now = new Date();
       document.getElementById("datetime").value = now.toISOString().slice(0, 16);
     };
 
     const renderServices = () => {
       document.getElementById("services-list").innerHTML = state.services
-        .map(s => `<div class="mini-row"><div><strong>${s.name}</strong><small class="sub">${s.duration} min</small></div><div class="pill">${currencySymbol}${s.price}</div></div>`).join("");
+        .map(s => `<div class="mini-row"><div><strong>${esc(s.name)}</strong><small class="sub">${esc(s.duration)} min</small></div><div class="pill">${currencySymbol}${esc(s.price)}</div></div>`).join("");
     };
     const renderStaff = () => {
       document.getElementById("staff-list").innerHTML = state.staff
-        .map(s => `<div class="mini-row"><div><strong>${s.name}</strong><small class="sub">${s.skill}</small></div><div class="status ${s.status === "On duty" ? "checked-in" : "pending"}">${s.status}</div></div>`).join("");
+        .map(s => `<div class="mini-row"><div><strong>${esc(s.name)}</strong><small class="sub">${esc(s.skill)}</small></div><div class="status ${s.status === "On duty" ? "checked-in" : "pending"}">${esc(s.status)}</div></div>`).join("");
     };
     const renderInventory = () => {
       document.getElementById("inventory-list").innerHTML = state.inventory
         .map(i => {
           const low = Number(i.qty) <= Number(i.threshold);
-          return `<div class="mini-row"><div><strong>${i.item}</strong><small class="sub">Threshold ${i.threshold}</small></div><div class="status ${low ? "pending" : "scheduled"}">${i.qty} in stock</div></div>`;
+          return `<div class="mini-row"><div><strong>${esc(i.item)}</strong><small class="sub">Threshold ${esc(i.threshold)}</small></div><div class="status ${low ? "pending" : "scheduled"}">${esc(i.qty)} in stock</div></div>`;
         }).join("");
     };
     const renderNotes = () => {
       document.getElementById("notes-list").innerHTML = state.notes
-        .map(n => `<div class="mini-row"><div><strong>${n.client}</strong><small class="sub">${n.text}</small></div></div>`).join("");
+        .map(n => `<div class="mini-row"><div><strong>${esc(n.client)}</strong><small class="sub">${esc(n.text)}</small></div></div>`).join("");
     };
 
     const renderAppointments = () => {
@@ -416,7 +419,7 @@
           const cls = a.status === "Scheduled" ? "scheduled" : a.status === "Checked-in" ? "checked-in" : "pending";
           const time = new Date(a.datetime);
           const timeText = `${time.toLocaleDateString(undefined, { weekday: "short" })} ${time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
-          return `<tr><td>${timeText}</td><td>${a.customer}</td><td>${a.service}</td><td>${a.staff}</td><td><span class="status ${cls}">${a.status}</span></td></tr>`;
+          return `<tr><td>${esc(timeText)}</td><td>${esc(a.customer)}</td><td>${esc(a.service)}</td><td>${esc(a.staff)}</td><td><span class="status ${cls}">${esc(a.status)}</span></td></tr>`;
         })
         .join("");
     };
@@ -426,7 +429,8 @@
       const todayAppointments = state.appointments.filter(a => a.datetime.startsWith(today));
       const revenue = todayAppointments.reduce((sum, appt) => {
         const service = state.services.find(s => s.name === appt.service);
-        return sum + (service ? Number(service.price) : 0);
+        const price = Number(service?.price ?? 0);
+        return sum + (Number.isFinite(price) ? price : 0);
       }, 0);
       const lowInventory = state.inventory.filter(i => Number(i.qty) <= Number(i.threshold)).length;
       document.getElementById("stat-appointments").textContent = todayAppointments.length;
@@ -456,10 +460,13 @@
     document.getElementById("service-form").addEventListener("submit", (e) => {
       e.preventDefault();
       const form = e.target;
+      const price = Number(form.price.value);
+      const duration = Number(form.duration.value);
+      if (!Number.isFinite(price) || !Number.isFinite(duration)) return alert("Enter valid numbers for price and duration.");
       state.services.unshift({
         name: form.name.value,
-        price: Number(form.price.value),
-        duration: Number(form.duration.value)
+        price,
+        duration
       });
       persist();
       renderServices(); renderSelects(); updateStats();
@@ -469,10 +476,13 @@
     document.getElementById("inventory-form").addEventListener("submit", (e) => {
       e.preventDefault();
       const form = e.target;
+      const qty = Number(form.qty.value);
+      const threshold = Number(form.threshold.value);
+      if (!Number.isFinite(qty) || !Number.isFinite(threshold)) return alert("Enter valid numbers for quantity and minimum level.");
       state.inventory.unshift({
         item: form.item.value,
-        qty: Number(form.qty.value),
-        threshold: Number(form.threshold.value)
+        qty,
+        threshold
       });
       persist();
       renderInventory(); updateStats();
