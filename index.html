@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Beauty Parlor / Salon Management System</title>
+  <style>
+    :root {
+      --bg: #080a12;
+      --panel: rgba(255, 255, 255, 0.06);
+      --border: rgba(255, 255, 255, 0.08);
+      --accent: #ff6fb1;
+      --accent-2: #7cf5ff;
+      --text: #e9eef7;
+      --muted: #a3afc4;
+      --success: #7fffd4;
+      --warning: #ffd166;
+      --danger: #ff8fa3;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+      color: var(--text);
+      background: radial-gradient(circle at 20% 20%, rgba(255, 111, 177, 0.12), transparent 40%),
+        radial-gradient(circle at 80% 0%, rgba(124, 245, 255, 0.12), transparent 40%),
+        linear-gradient(145deg, #06070e, #0b1021 55%, #080b16);
+      min-height: 100vh;
+    }
+    .container { width: min(1200px, 94vw); margin: 0 auto 64px; padding: 0 0 32px; }
+    header.hero {
+      padding: 56px 0 32px;
+      text-align: center;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 14px;
+      backdrop-filter: blur(8px);
+    }
+    h1 {
+      margin: 16px 0 12px;
+      font-size: clamp(28px, 4vw, 40px);
+      letter-spacing: -0.02em;
+    }
+    h1 span { color: var(--accent); }
+    header.hero p {
+      margin: 0 auto 20px;
+      color: var(--muted);
+      width: min(760px, 90vw);
+      line-height: 1.6;
+      font-size: 16px;
+    }
+    .hero-actions {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      border: none;
+      cursor: pointer;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      color: #0a0c16;
+      background: linear-gradient(120deg, var(--accent), #f7c6ff);
+      box-shadow: 0 10px 40px rgba(255, 111, 177, 0.35);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .btn.secondary {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.06);
+      box-shadow: none;
+      border: 1px solid var(--border);
+    }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 14px 48px rgba(255, 111, 177, 0.4); }
+    .btn.secondary:hover { transform: translateY(-1px); box-shadow: 0 10px 30px rgba(124, 245, 255, 0.2); }
+    .grid { display: grid; gap: 16px; }
+    .grid-3 { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+    .grid-4 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+    .grid-2 { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px 18px 14px;
+      box-shadow: 0 10px 32px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(8px);
+    }
+    .card h3 { margin: 4px 0 8px; letter-spacing: -0.01em; }
+    .sub { color: var(--muted); font-size: 14px; margin: 0 0 10px; }
+    .stat {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 10px; border-radius: 12px; margin-top: 8px;
+      background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border);
+    }
+    .pill {
+      padding: 6px 10px; border-radius: 999px; font-size: 13px; font-weight: 600;
+      border: 1px solid var(--border); background: rgba(255, 255, 255, 0.06); color: var(--accent-2);
+    }
+    form { display: grid; gap: 10px; margin-top: 10px; }
+    label { font-size: 13px; color: var(--muted); }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      font-size: 14px;
+    }
+    textarea { resize: vertical; min-height: 68px; }
+    input:focus, select:focus, textarea:focus { outline: 2px solid rgba(255, 111, 177, 0.35); }
+    table { width: 100%; border-collapse: collapse; color: var(--text); }
+    th, td {
+      padding: 10px 8px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      font-size: 14px;
+    }
+    th { color: var(--muted); font-weight: 600; letter-spacing: 0.02em; }
+    tr:hover td { background: rgba(255, 255, 255, 0.02); }
+    .status { padding: 6px 10px; border-radius: 10px; font-weight: 600; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; }
+    .status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+    .status.scheduled { color: var(--accent-2); background: rgba(124, 245, 255, 0.14); }
+    .status.checked-in { color: var(--success); background: rgba(127, 255, 212, 0.12); }
+    .status.pending { color: var(--warning); background: rgba(255, 209, 102, 0.12); }
+    .mini-list { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+    .mini-row {
+      display: flex; justify-content: space-between; gap: 10px;
+      padding: 10px 12px; border-radius: 12px; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border);
+    }
+    .mini-row strong { display: block; }
+    .workflow {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;
+      margin: 10px 0 6px;
+    }
+    .workflow span {
+      padding: 12px 14px; border-radius: 12px; border: 1px dashed var(--border);
+      background: rgba(255, 255, 255, 0.03); font-weight: 600; color: var(--muted);
+    }
+    .tag { padding: 6px 8px; border-radius: 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border); color: var(--muted); font-size: 12px; }
+    .toast {
+      position: fixed; right: 18px; bottom: 18px; z-index: 10;
+      padding: 12px 14px; border-radius: 12px;
+      background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border);
+      color: var(--text); box-shadow: 0 10px 32px rgba(0,0,0,0.35);
+      opacity: 0; transform: translateY(8px); transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    @media (max-width: 640px) {
+      .stat { flex-direction: column; align-items: flex-start; gap: 6px; }
+      th, td { font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="hero">
+      <div class="badge">Micro SaaS • Workflow ready</div>
+      <h1>Beauty Parlor / Salon Management System <span>(বিউটি পার্লার / সেলুন ম্যানেজমেন্ট)</span></h1>
+      <p>
+        A user-friendly, bilingual-friendly dashboard to handle appointments, stylists, services, inventory, and client notes
+        without friction. Designed for fast onboarding and an impressive first impression for owners and front-desk teams.
+      </p>
+      <div class="hero-actions">
+        <button class="btn" onclick="document.getElementById('appointment-form').scrollIntoView({behavior:'smooth'})">Schedule now</button>
+        <button class="btn secondary" onclick="document.getElementById('agenda').scrollIntoView({behavior:'smooth'})">View agenda</button>
+      </div>
+    </header>
+
+    <section class="grid grid-4">
+      <div class="card stat">
+        <div>
+          <div class="pill">Today's appointments</div>
+          <strong id="stat-appointments" style="font-size:24px; display:block; margin-top:6px;">0</strong>
+          <small class="sub">Same-day bookings ready</small>
+        </div>
+        <div class="status scheduled">Live</div>
+      </div>
+      <div class="card stat">
+        <div>
+          <div class="pill">Revenue projection</div>
+          <strong id="stat-revenue" style="font-size:24px; display:block; margin-top:6px;">$0</strong>
+          <small class="sub">Based on today’s confirmed services</small>
+        </div>
+        <div class="tag">Track &amp; convert</div>
+      </div>
+      <div class="card stat">
+        <div>
+          <div class="pill">Active stylists</div>
+          <strong id="stat-staff" style="font-size:24px; display:block; margin-top:6px;">0</strong>
+          <small class="sub">Ready for assignments</small>
+        </div>
+        <div class="tag">Roster</div>
+      </div>
+      <div class="card stat">
+        <div>
+          <div class="pill">Low inventory</div>
+          <strong id="stat-low" style="font-size:24px; display:block; margin-top:6px;">0</strong>
+          <small class="sub">Restock before rush hour</small>
+        </div>
+        <div class="tag">Ops</div>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:16px;">
+      <h3>Workflow at a glance</h3>
+      <p class="sub">Guide your front desk through the same flow every time.</p>
+      <div class="workflow" id="workflow-steps"></div>
+    </section>
+
+    <section class="grid grid-2" style="margin-top:16px;">
+      <div class="card">
+        <h3>Schedule appointment</h3>
+        <p class="sub">Fast intake with Bengali-friendly fields.</p>
+        <form id="appointment-form">
+          <div>
+            <label for="customer">Customer name</label>
+            <input id="customer" name="customer" required placeholder="e.g., Anika Rahman" />
+          </div>
+          <div>
+            <label for="service">Service</label>
+            <select id="service" name="service" required></select>
+          </div>
+          <div>
+            <label for="staff">Assign stylist</label>
+            <select id="staff" name="staff" required></select>
+          </div>
+          <div>
+            <label for="datetime">Date &amp; time</label>
+            <input id="datetime" name="datetime" type="datetime-local" required />
+          </div>
+          <div>
+            <label for="notes">Client note</label>
+            <textarea id="notes" name="notes" placeholder="Preferred style, allergy, vip?"></textarea>
+          </div>
+          <button class="btn" type="submit">Add to agenda</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h3>Client &amp; experience notes</h3>
+        <p class="sub">Capture micro-details that keep clients delighted.</p>
+        <div class="mini-list" id="notes-list"></div>
+      </div>
+    </section>
+
+    <section class="grid grid-3" style="margin-top:16px;">
+      <div class="card">
+        <h3>Services</h3>
+        <p class="sub">Price, duration, and upsell hints.</p>
+        <div class="mini-list" id="services-list"></div>
+        <form id="service-form" style="margin-top:12px;">
+          <div>
+            <label for="new-service">Add service</label>
+            <input id="new-service" name="name" placeholder="e.g., Keratin Spa" required />
+          </div>
+          <div style="display:flex; gap:10px;">
+            <input name="price" type="number" placeholder="Price" required />
+            <input name="duration" type="number" placeholder="Duration (min)" required />
+          </div>
+          <button class="btn secondary" type="submit">Save service</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h3>Stylists / Staff</h3>
+        <p class="sub">Track specialties &amp; availability.</p>
+        <div class="mini-list" id="staff-list"></div>
+        <form id="staff-form" style="margin-top:12px;">
+          <div>
+            <label for="staff-name">Add staff</label>
+            <input id="staff-name" name="name" placeholder="Name" required />
+          </div>
+          <div style="display:flex; gap:10px;">
+            <input name="skill" placeholder="Specialty" required />
+            <select name="status">
+              <option value="On duty">On duty</option>
+              <option value="Break">Break</option>
+              <option value="Off">Off</option>
+            </select>
+          </div>
+          <button class="btn secondary" type="submit">Save staff</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h3>Inventory</h3>
+        <p class="sub">Avoid stock-outs during peak hours.</p>
+        <div class="mini-list" id="inventory-list"></div>
+        <form id="inventory-form" style="margin-top:12px;">
+          <div>
+            <label for="item-name">Add item</label>
+            <input id="item-name" name="item" placeholder="e.g., Hair serum" required />
+          </div>
+          <div style="display:flex; gap:10px;">
+            <input name="qty" type="number" placeholder="Qty" required />
+            <input name="threshold" type="number" placeholder="Min level" required />
+          </div>
+          <button class="btn secondary" type="submit">Track item</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="card" id="agenda" style="margin-top:16px;">
+      <h3>Agenda &amp; check-ins</h3>
+      <p class="sub">Tight, color-coded list for the day.</p>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Client</th>
+              <th>Service</th>
+              <th>Stylist</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="appointments-body"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const storageKey = "bpsms-data";
+    const currencySymbol = "$";
+    const currencyDecimals = 0;
+    const todayISODate = () => new Date().toISOString().slice(0, 10);
+    const timeAt = (h, m) => {
+      const d = new Date();
+      d.setHours(h, m, 0, 0);
+      return d.toISOString().slice(0, 16);
+    };
+    const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    })[c]);
+    const toast = document.getElementById("toast");
+    let toastTimer;
+    const notify = (message) => {
+      if (!toast) { alert(message); return; }
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 2800);
+    };
+    const workflowSteps = [
+      "Intake & record client preference",
+      "Match stylist & service",
+      "Reserve slot, auto check-in",
+      "Close sale & note follow-up"
+    ];
+    const defaultData = {
+      appointments: [
+        { customer: "Anika Rahman", service: "Hair Spa", staff: "Rumi", datetime: timeAt(11, 30), status: "Scheduled", notes: "Prefers calm fragrance" },
+        { customer: "Sadia Noor", service: "Bridal Makeup", staff: "Nabila", datetime: timeAt(14, 0), status: "Pending", notes: "নরম লুক (সফট গ্ল্যাম)" },
+        { customer: "Mahi Hasan", service: "Classic Cut", staff: "Riaz", datetime: timeAt(16, 15), status: "Scheduled", notes: "Loyal client" }
+      ],
+      services: [
+        { name: "Classic Cut", price: 18, duration: 25 },
+        { name: "Hair Spa", price: 35, duration: 45 },
+        { name: "Bridal Makeup", price: 120, duration: 120 },
+        { name: "Keratin Treatment", price: 95, duration: 90 }
+      ],
+      staff: [
+        { name: "Nabila", skill: "Makeup & Style", status: "On duty" },
+        { name: "Rumi", skill: "Hair Spa", status: "On duty" },
+        { name: "Riaz", skill: "Cuts & Styling", status: "Break" }
+      ],
+      inventory: [
+        { item: "Hair serum", qty: 8, threshold: 5 },
+        { item: "Disposable towels", qty: 22, threshold: 15 },
+        { item: "Nail polish remover", qty: 3, threshold: 6 }
+      ],
+      notes: [
+        { client: "VIP / Regular", text: "সাপ্তাহিক ছুটিতে বিশ্বস্ত ক্লায়েন্টদের জন্য স্লট রিজার্ভ রাখুন (Keep backup slots on weekends for loyal clients)." },
+        { client: "স্বাস্থ্যবিধি", text: "ব্রাইডাল সেশনের মাঝে যন্ত্রপাতি জীবাণুমুক্ত করুন (Sanitize tools between bridal sessions)." }
+      ]
+    };
+
+    const loadData = () => {
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        try { return JSON.parse(saved); } catch (e) { console.warn("Resetting corrupted salon data", e); notify("Saved salon data was reset due to corruption."); }
+      }
+      return defaultData;
+    };
+    const state = loadData();
+    const persist = () => localStorage.setItem(storageKey, JSON.stringify(state));
+
+    const serviceSelect = document.getElementById("service");
+    const staffSelect = document.getElementById("staff");
+    const appointmentBody = document.getElementById("appointments-body");
+
+    const renderSelects = () => {
+      serviceSelect.innerHTML = state.services.map(s => `<option value="${esc(s.name)}">${esc(s.name)} — ${currencySymbol}${esc(s.price)}</option>`).join("");
+      staffSelect.innerHTML = state.staff.map(s => `<option value="${esc(s.name)}">${esc(s.name)} (${esc(s.skill)})</option>`).join("");
+      const now = new Date();
+      document.getElementById("datetime").value = now.toISOString().slice(0, 16);
+    };
+
+    const renderServices = () => {
+      document.getElementById("services-list").innerHTML = state.services
+        .map(s => `<div class="mini-row"><div><strong>${esc(s.name)}</strong><small class="sub">${esc(s.duration)} min</small></div><div class="pill">${currencySymbol}${esc(s.price)}</div></div>`).join("");
+    };
+    const renderStaff = () => {
+      document.getElementById("staff-list").innerHTML = state.staff
+        .map(s => `<div class="mini-row"><div><strong>${esc(s.name)}</strong><small class="sub">${esc(s.skill)}</small></div><div class="status ${s.status === "On duty" ? "checked-in" : "pending"}">${esc(s.status)}</div></div>`).join("");
+    };
+    const renderInventory = () => {
+      document.getElementById("inventory-list").innerHTML = state.inventory
+        .map(i => {
+          const low = Number(i.qty) <= Number(i.threshold);
+          return `<div class="mini-row"><div><strong>${esc(i.item)}</strong><small class="sub">Threshold ${esc(i.threshold)}</small></div><div class="status ${low ? "pending" : "scheduled"}">${esc(i.qty)} in stock</div></div>`;
+        }).join("");
+    };
+    const renderNotes = () => {
+      document.getElementById("notes-list").innerHTML = state.notes
+        .map(n => `<div class="mini-row"><div><strong>${esc(n.client)}</strong><small class="sub">${esc(n.text)}</small></div></div>`).join("");
+    };
+
+    const renderAppointments = () => {
+      appointmentBody.innerHTML = state.appointments
+        .slice()
+        .sort((a, b) => new Date(a.datetime) - new Date(b.datetime))
+        .map(a => {
+          const statusKey = String(a.status || "").toLowerCase();
+          const statusClass = { "scheduled": "scheduled", "checked-in": "checked-in", "pending": "pending" };
+          const cls = statusClass[statusKey] || "pending";
+          const time = new Date(a.datetime);
+          const timeText = `${time.toLocaleDateString(undefined, { weekday: "short" })} ${time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+          return `<tr><td>${esc(timeText)}</td><td>${esc(a.customer)}</td><td>${esc(a.service)}</td><td>${esc(a.staff)}</td><td><span class="status ${cls}">${esc(a.status)}</span></td></tr>`;
+        })
+        .join("");
+    };
+    const renderWorkflow = () => {
+      const wrap = document.getElementById("workflow-steps");
+      if (!wrap) return;
+      wrap.innerHTML = workflowSteps.map((step, idx) => `<span>${idx + 1}. ${esc(step)}</span>`).join("");
+    };
+
+    const updateStats = () => {
+      const today = todayISODate();
+      const todayAppointments = state.appointments.filter(a => a.datetime.startsWith(today));
+      const revenue = todayAppointments.reduce((sum, appt) => {
+        const service = state.services.find(s => s.name === appt.service);
+        const price = Number(service?.price ?? 0);
+        return sum + (Number.isFinite(price) ? price : 0);
+      }, 0);
+      const lowInventory = state.inventory.filter(i => Number(i.qty) <= Number(i.threshold)).length;
+      document.getElementById("stat-appointments").textContent = todayAppointments.length;
+      document.getElementById("stat-revenue").textContent = `${currencySymbol}${revenue.toFixed(currencyDecimals)}`;
+      document.getElementById("stat-staff").textContent = state.staff.length;
+      document.getElementById("stat-low").textContent = lowInventory;
+    };
+
+    document.getElementById("appointment-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const data = {
+        customer: form.customer.value,
+        service: form.service.value,
+        staff: form.staff.value,
+        datetime: form.datetime.value,
+        status: "Scheduled",
+        notes: form.notes.value.trim()
+      };
+      state.appointments.push(data);
+      if (data.notes && !state.notes.some(n => n.client === data.customer && n.text === data.notes)) {
+        state.notes.unshift({ client: data.customer, text: data.notes });
+      }
+      persist();
+      renderAppointments(); renderNotes(); updateStats();
+      form.reset(); renderSelects();
+    });
+
+    document.getElementById("service-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const price = Number(form.price.value);
+      const duration = Number(form.duration.value);
+      if (!Number.isFinite(price) || price <= 0 || !Number.isFinite(duration) || duration < 0) {
+        notify("Enter a valid price (>0) and duration (≥0 minutes).");
+        return;
+      }
+      state.services.unshift({
+        name: form.name.value,
+        price,
+        duration
+      });
+      persist();
+      renderServices(); renderSelects(); updateStats();
+      form.reset();
+    });
+
+    document.getElementById("inventory-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const qty = Number(form.qty.value);
+      const threshold = Number(form.threshold.value);
+      if (!Number.isFinite(qty) || qty < 0 || !Number.isFinite(threshold) || threshold < 0) {
+        notify("Enter valid non-negative numbers for quantity and minimum level.");
+        return;
+      }
+      state.inventory.unshift({
+        item: form.item.value,
+        qty,
+        threshold
+      });
+      persist();
+      renderInventory(); updateStats();
+      form.reset();
+    });
+
+    document.getElementById("staff-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const form = e.target;
+      state.staff.unshift({
+        name: form.name.value,
+        skill: form.skill.value,
+        status: form.status.value
+      });
+      persist();
+      renderStaff(); renderSelects(); updateStats();
+      form.reset();
+    });
+
+    renderServices();
+    renderStaff();
+    renderInventory();
+    renderNotes();
+    renderSelects();
+    renderAppointments();
+    renderWorkflow();
+    updateStats();
+  </script>
+</body>
+</html>
