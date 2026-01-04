@@ -227,11 +227,11 @@
           </div>
           <div>
             <label for="service">Service</label>
-            <select id="service" name="service"></select>
+            <select id="service" name="service" required></select>
           </div>
           <div>
             <label for="staff">Assign stylist</label>
-            <select id="staff" name="staff"></select>
+            <select id="staff" name="staff" required></select>
           </div>
           <div>
             <label for="datetime">Date &amp; time</label>
@@ -462,7 +462,10 @@
       const form = e.target;
       const price = Number(form.price.value);
       const duration = Number(form.duration.value);
-      if (!Number.isFinite(price) || !Number.isFinite(duration)) return alert("Enter valid numbers for price and duration.");
+      if (!Number.isFinite(price) || price <= 0 || !Number.isFinite(duration) || duration <= 0) {
+        alert("Enter a valid price (>0) and duration (>0 minutes).");
+        return;
+      }
       state.services.unshift({
         name: form.name.value,
         price,
@@ -478,7 +481,10 @@
       const form = e.target;
       const qty = Number(form.qty.value);
       const threshold = Number(form.threshold.value);
-      if (!Number.isFinite(qty) || !Number.isFinite(threshold)) return alert("Enter valid numbers for quantity and minimum level.");
+      if (!Number.isFinite(qty) || qty < 0 || !Number.isFinite(threshold) || threshold < 0) {
+        alert("Enter valid non-negative numbers for quantity and minimum level.");
+        return;
+      }
       state.inventory.unshift({
         item: form.item.value,
         qty,
