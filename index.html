@@ -159,7 +159,7 @@
   <div class="container">
     <header class="hero">
       <div class="badge">Micro SaaS • Workflow ready</div>
-      <h1>Beauty Parlor / Salon Management System <span>(বিউটি পার্লার ম্যানেজমেন্ট)</span></h1>
+      <h1>Beauty Parlor / Salon Management System <span>(বিউটি পার্লার / সেলুন ম্যানেজমেন্ট)</span></h1>
       <p>
         A user-friendly, bilingual-friendly dashboard to handle appointments, stylists, services, inventory, and client notes
         without friction. Designed for fast onboarding and an impressive first impression for owners and front-desk teams.
@@ -332,6 +332,7 @@
   <script>
     const storageKey = "bpsms-data";
     const currencySymbol = "$";
+    const currencyDecimals = 0;
     const todayISODate = () => new Date().toISOString().slice(0, 10);
     const timeAt = (h, m) => {
       const d = new Date();
@@ -341,7 +342,7 @@
     const defaultData = {
       appointments: [
         { customer: "Anika Rahman", service: "Hair Spa", staff: "Rumi", datetime: timeAt(11, 30), status: "Scheduled", notes: "Prefers calm fragrance" },
-        { customer: "Sadia Noor", service: "Bridal Makeup", staff: "Nabila", datetime: timeAt(14, 0), status: "Pending", notes: "নরম লুক, soft glam" },
+        { customer: "Sadia Noor", service: "Bridal Makeup", staff: "Nabila", datetime: timeAt(14, 0), status: "Pending", notes: "নরম লুক (সফট গ্ল্যাম)" },
         { customer: "Mahi Hasan", service: "Classic Cut", staff: "Riaz", datetime: timeAt(16, 15), status: "Scheduled", notes: "Loyal client" }
       ],
       services: [
@@ -369,7 +370,7 @@
     const loadData = () => {
       const saved = localStorage.getItem(storageKey);
       if (saved) {
-        try { return JSON.parse(saved); } catch (e) { /* ignore */ }
+        try { return JSON.parse(saved); } catch (e) { console.warn("Resetting corrupted salon data", e); }
       }
       return defaultData;
     };
@@ -429,7 +430,7 @@
       }, 0);
       const lowInventory = state.inventory.filter(i => Number(i.qty) <= Number(i.threshold)).length;
       document.getElementById("stat-appointments").textContent = todayAppointments.length;
-      document.getElementById("stat-revenue").textContent = `${currencySymbol}${revenue.toFixed(0)}`;
+      document.getElementById("stat-revenue").textContent = `${currencySymbol}${revenue.toFixed(currencyDecimals)}`;
       document.getElementById("stat-staff").textContent = state.staff.length;
       document.getElementById("stat-low").textContent = lowInventory;
     };
