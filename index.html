@@ -86,6 +86,7 @@
     .btn.secondary:hover { transform: translateY(-1px); box-shadow: 0 10px 30px rgba(124, 245, 255, 0.2); }
     .grid { display: grid; gap: 16px; }
     .grid-3 { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+    .grid-4 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
     .grid-2 { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
     .card {
       background: var(--panel);
@@ -330,6 +331,7 @@
 
   <script>
     const storageKey = "bpsms-data";
+    const currencySymbol = "$";
     const todayISODate = () => new Date().toISOString().slice(0, 10);
     const timeAt = (h, m) => {
       const d = new Date();
@@ -359,8 +361,8 @@
         { item: "Nail polish remover", qty: 3, threshold: 6 }
       ],
       notes: [
-        { client: "VIP / Regular", text: "Keep backup slots on weekends for loyal clients." },
-        { client: "Hygiene", text: "Double-check tool sterilization between bridal sessions." }
+        { client: "VIP / Regular", text: "সাপ্তাহিক ছুটিতে বিশ্বস্ত ক্লায়েন্টদের জন্য স্লট রিজার্ভ রাখুন।" },
+        { client: "স্বাস্থ্যবিধি", text: "ব্রাইডাল সেশনের মাঝে যন্ত্রপাতি জীবাণুমুক্ত করুন।" }
       ]
     };
 
@@ -379,7 +381,7 @@
     const appointmentBody = document.getElementById("appointments-body");
 
     const renderSelects = () => {
-      serviceSelect.innerHTML = state.services.map(s => `<option value="${s.name}">${s.name} — $${s.price}</option>`).join("");
+      serviceSelect.innerHTML = state.services.map(s => `<option value="${s.name}">${s.name} — ${currencySymbol}${s.price}</option>`).join("");
       staffSelect.innerHTML = state.staff.map(s => `<option value="${s.name}">${s.name} (${s.skill})</option>`).join("");
       const now = new Date();
       document.getElementById("datetime").value = now.toISOString().slice(0, 16);
@@ -387,7 +389,7 @@
 
     const renderServices = () => {
       document.getElementById("services-list").innerHTML = state.services
-        .map(s => `<div class="mini-row"><div><strong>${s.name}</strong><small class="sub">${s.duration} min</small></div><div class="pill">$${s.price}</div></div>`).join("");
+        .map(s => `<div class="mini-row"><div><strong>${s.name}</strong><small class="sub">${s.duration} min</small></div><div class="pill">${currencySymbol}${s.price}</div></div>`).join("");
     };
     const renderStaff = () => {
       document.getElementById("staff-list").innerHTML = state.staff
@@ -427,7 +429,7 @@
       }, 0);
       const lowInventory = state.inventory.filter(i => Number(i.qty) <= Number(i.threshold)).length;
       document.getElementById("stat-appointments").textContent = todayAppointments.length;
-      document.getElementById("stat-revenue").textContent = `$${revenue.toFixed(0)}`;
+      document.getElementById("stat-revenue").textContent = `${currencySymbol}${revenue.toFixed(0)}`;
       document.getElementById("stat-staff").textContent = state.staff.length;
       document.getElementById("stat-low").textContent = lowInventory;
     };
