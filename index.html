@@ -435,7 +435,9 @@
         .slice()
         .sort((a, b) => new Date(a.datetime) - new Date(b.datetime))
         .map(a => {
-          const cls = a.status === "Scheduled" ? "scheduled" : a.status === "Checked-in" ? "checked-in" : "pending";
+          const statusKey = String(a.status || "").toLowerCase();
+          const statusClass = { "scheduled": "scheduled", "checked-in": "checked-in", "pending": "pending" };
+          const cls = statusClass[statusKey] || "pending";
           const time = new Date(a.datetime);
           const timeText = `${time.toLocaleDateString(undefined, { weekday: "short" })} ${time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
           return `<tr><td>${esc(timeText)}</td><td>${esc(a.customer)}</td><td>${esc(a.service)}</td><td>${esc(a.staff)}</td><td><span class="status ${cls}">${esc(a.status)}</span></td></tr>`;
@@ -475,7 +477,9 @@
         notes: form.notes.value.trim()
       };
       state.appointments.push(data);
-      if (data.notes) state.notes.unshift({ client: data.customer, text: data.notes });
+      if (data.notes && !state.notes.some(n => n.client === data.customer && n.text === data.notes)) {
+        state.notes.unshift({ client: data.customer, text: data.notes });
+      }
       persist();
       renderAppointments(); renderNotes(); updateStats();
       form.reset(); renderSelects();
@@ -486,8 +490,8 @@
       const form = e.target;
       const price = Number(form.price.value);
       const duration = Number(form.duration.value);
-      if (!Number.isFinite(price) || price <= 0 || !Number.isFinite(duration) || duration <= 0) {
-        notify("Enter a valid price (>0) and duration (>0 minutes).");
+      if (!Number.isFinite(price) || price <= 0 || !Number.isFinite(duration) || duration < 0) {
+        notify("Enter a valid price (>0) and duration (≥0 minutes).");
         return;
       }
       state.services.unshift({
@@ -505,8 +509,8 @@
       const form = e.target;
       const qty = Number(form.qty.value);
       const threshold = Number(form.threshold.value);
-      if (!Number.isFinite(qty) || qty <= 0 || !Number.isFinite(threshold) || threshold <= 0) {
-        notify("Enter valid positive numbers for quantity and minimum level.");
+      if (!Number.isFinite(qty) || qty < 0 || !Number.isFinite(threshold) || threshold < 0) {
+        notify("Enter valid non-negative numbers for quantity and minimum level.");
         return;
       }
       state.inventory.unshift({
